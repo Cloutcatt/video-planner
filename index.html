@@ -1,21 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Planner - Nexus Tools</title>
     <style>
-        body { background: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; padding-top: 50px; }
-        .container { background: #1e1e1e; padding: 30px; border-radius: 16px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        h2 { color: #fff; margin-bottom: 20px; font-weight: 600; }
-        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; margin-bottom: 20px; font-size: 16px; }
-        .item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #333; }
-        .checkbox { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .checkbox.checked { background: #007bff; border-color: #007bff; }
-        .checkbox.checked::after { content: '✓'; color: white; font-size: 14px; }
-        .text { flex-grow: 1; font-size: 16px; }
-        .delete { color: #555; cursor: pointer; font-size: 18px; }
-        .delete:hover { color: #ff4d4d; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body { 
+            background-color: #0d1117; 
+            background-image: 
+                radial-gradient(circle at 80% 20%, rgba(88, 166, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 10% 80%, rgba(248, 81, 73, 0.03) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #c9d1d9; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh;
+            padding: 40px 20px;
+            padding-top: 100px; /* Leave space for the fixed back button */
+        }
+
+        /* --- Nexus Dark Theme Container --- */
+        .container { 
+            background: #161b22; 
+            padding: 30px; 
+            border-radius: 6px; 
+            width: 100%;
+            max-width: 450px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            border: 1px solid #30363d;
+            height: fit-content;
+        }
+
+        h2 { 
+            color: #58a6ff; 
+            margin-bottom: 20px; 
+            font-weight: 600; 
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        /* Modernized Input Box */
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            background: #21262d; 
+            border: 1px solid #30363d; 
+            color: #ffffff; 
+            border-radius: 6px; 
+            margin-bottom: 20px; 
+            font-size: 15px; 
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+        }
+
+        /* --- Planner Task List Layout --- */
+        .item { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-bottom: 12px; 
+            padding-bottom: 10px; 
+            border-bottom: 1px solid #30363d; 
+        }
+
+        /* Dark Theme Checkbox with Glowing Lighter Outline */
+        .checkbox { 
+            width: 22px; 
+            height: 22px; 
+            background: #0d1117;
+            border: 2px solid #30363d; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: border-color 0.25s, box-shadow 0.25s;
+            flex-shrink: 0;
+        }
+
+        .checkbox:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 0 8px rgba(88, 166, 255, 0.2);
+        }
+
+        /* Checked Style - Dark Base with a Light Vibrant Glow Outline */
+        .checkbox.checked { 
+            background: #161b22; 
+            border-color: #58a6ff; 
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+            animation: popCheck 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .checkbox::after {
+            content: '✓'; 
+            color: #58a6ff; 
+            font-size: 13px; 
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .checkbox.checked::after { 
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Smooth Pop Scale Keyframe Animation */
+        @keyframes popCheck {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .text { 
+            flex-grow: 1; 
+            font-size: 15px; 
+            color: #c9d1d9;
+            word-break: break-word;
+            transition: color 0.25s, opacity 0.25s;
+        }
+
+        /* Modernized Item Eraser button */
+        .delete { 
+            color: #8b949e; 
+            cursor: pointer; 
+            font-size: 22px; 
+            line-height: 1;
+            transition: color 0.2s;
+            user-select: none;
+            padding: 0 4px;
+        }
+
+        .delete:hover { 
+            color: #f85149; 
+        }
+
+        /* --- Back to Home Zoom Transition Setup --- */
+        .back-link {
+            position: fixed; 
+            top: 15px; 
+            left: 15px; 
+            z-index: 999; 
+            background: #161b22; 
+            color: #c9d1d9; 
+            padding: 8px 14px; 
+            text-decoration: none; 
+            border: 1px solid #30363d;
+            border-radius: 6px; 
+            font-weight: 600; 
+            font-size: 13px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25); 
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .back-link:hover {
+            background-color: #30363d;
+            border-color: #58a6ff;
+            color: #ffffff;
+        }
+
+        #transition-overlay {
+            display: none;
+            position: fixed;
+            background-color: #0d1117;
+            border: 1px solid #58a6ff;
+            border-radius: 6px;
+            z-index: 9999;
+            transition: all 0.45s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        #transition-overlay.active {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0;
+            border-color: #0d1117;
+        }
     </style>
 </head>
 <body>
+
+<a href="https://cloutcatt.github.io/main-menu-for-nexus-tools/" class="back-link" id="back-btn">
+   &lt;- Back to Home
+</a>
 
 <div class="container">
     <h2>Video Planner</h2>
@@ -23,9 +204,34 @@
     <div id="taskList"></div>
 </div>
 
+<div id="transition-overlay"></div>
+
 <script>
     let tasks = JSON.parse(localStorage.getItem('myVideos')) || [];
 
+    // --- Back Button Zoom Animation Logic ---
+    document.getElementById('back-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetUrl = this.getAttribute('href');
+        const overlay = document.getElementById('transition-overlay');
+        const rect = this.getBoundingClientRect();
+
+        overlay.style.top = rect.top + 'px';
+        overlay.style.left = rect.left + 'px';
+        overlay.style.width = rect.width + 'px';
+        overlay.style.height = rect.height + 'px';
+        overlay.style.display = 'block';
+
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 10);
+
+        setTimeout(() => {
+            window.location.href = targetUrl;
+        }, 450);
+    });
+
+    // --- Task List Management Logic ---
     function addTask() {
         let input = document.getElementById('taskInput');
         if(input.value.trim() !== "") {
@@ -42,7 +248,7 @@
         render();
     }
 
-    function del(i) {
+    function deleteTask(i) {
         tasks.splice(i, 1);
         localStorage.setItem('myVideos', JSON.stringify(tasks));
         render();
@@ -53,11 +259,13 @@
         list.innerHTML = tasks.map((t, i) => `
             <div class="item">
                 <div class="checkbox ${t.done ? 'checked' : ''}" onclick="toggle(${i})"></div>
-                <span class="text" style="${t.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${t.text}</span>
-                <span class="delete" onclick="del(${i})">×</span>
+                <span class="text" style="${t.done ? 'text-decoration: line-through; color: #8b949e; opacity: 0.6;' : ''}">${t.text}</span>
+                <span class="delete" onclick="deleteTask(${i})">×</span>
             </div>
         `).join('');
     }
+    
+    // Initial content population
     render();
 </script>
 </body>
