@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Planner</title>
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #007bff; --text: #e0e0e0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 40px; }
+        .container { background: var(--card); padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        h2 { color: var(--blue); margin-top: 0; }
+        input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #333; color: white; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: var(--blue); color: white; border: none; border-radius: 6px; margin-top: 10px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #0056b3; }
+        ul { list-style: none; padding: 0; margin-top: 20px; }
+        li { background: #2a2a2a; padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .del { color: #ff4d4d; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Video Ideas</h2>
+    <input type="text" id="taskInput" placeholder="Enter video title (e.g. Greenville Police Chase)...">
+    <button onclick="addTask()">Add to List</button>
+    <ul id="taskList"></ul>
+</div>
+
+<script>
+    let tasks = JSON.parse(localStorage.getItem('myVideos')) || [];
+    function render() {
+        const list = document.getElementById('taskList');
+        list.innerHTML = tasks.map((t, i) => `<li>${t} <span class="del" onclick="del(${i})">✕</span></li>`).join('');
+    }
+    function addTask() {
+        const input = document.getElementById('taskInput');
+        if(input.value) { tasks.push(input.value); localStorage.setItem('myVideos', JSON.stringify(tasks)); input.value = ''; render(); }
+    }
+    function del(i) { tasks.splice(i, 1); localStorage.setItem('myVideos', JSON.stringify(tasks)); render(); }
+    render();
+</script>
+</body>
+</html>
