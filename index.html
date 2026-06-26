@@ -1,17 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Video Notepad</title>
     <style>
-        :root { --bg: #121212; --blue: #007bff; }
-        body { background: var(--bg); color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        body { background: #121212; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
         .container { background: #1e1e1e; padding: 20px; border-radius: 10px; width: 100%; max-width: 450px; }
         input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #333; color: white; border-radius: 5px; box-sizing: border-box; }
         .task { background: #252525; padding: 12px; margin-top: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .controls span { cursor: pointer; filter: grayscale(1); opacity: 0.5; }
+        .controls span { cursor: pointer; filter: grayscale(1); opacity: 0.5; margin-left: 5px; }
         .controls span.active { filter: grayscale(0); opacity: 1; }
-        .del { color: #888; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -23,36 +19,26 @@
 </div>
 
 <script>
-    // 1. Load data
     let tasks = JSON.parse(localStorage.getItem('myVideos')) || [];
 
-    // 2. Save and Update
-    function sync() {
-        localStorage.setItem('myVideos', JSON.stringify(tasks));
-        render();
-    }
-
     function addTask() {
-        const input = document.getElementById('taskInput');
+        let input = document.getElementById('taskInput');
         if(input.value.trim() !== "") {
             tasks.push({text: input.value, status: [false, false, false]});
+            localStorage.setItem('myVideos', JSON.stringify(tasks));
             input.value = '';
-            sync();
+            render();
         }
     }
 
     function toggle(tIdx, sIdx) {
         tasks[tIdx].status[sIdx] = !tasks[tIdx].status[sIdx];
-        sync();
-    }
-
-    function removeTask(idx) {
-        tasks.splice(idx, 1);
-        sync();
+        localStorage.setItem('myVideos', JSON.stringify(tasks));
+        render();
     }
 
     function render() {
-        const list = document.getElementById('taskList');
+        let list = document.getElementById('taskList');
         list.innerHTML = tasks.map((t, i) => `
             <div class="task">
                 <span>${t.text}</span>
@@ -60,7 +46,6 @@
                     <span class="${t.status[0] ? 'active' : ''}" onclick="toggle(${i},0)">✅</span>
                     <span class="${t.status[1] ? 'active' : ''}" onclick="toggle(${i},1)">✅</span>
                     <span class="${t.status[2] ? 'active' : ''}" onclick="toggle(${i},2)">❌</span>
-                    <span class="del" onclick="removeTask(${i})">✕</span>
                 </div>
             </div>
         `).join('');
