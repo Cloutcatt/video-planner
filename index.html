@@ -2,40 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Video Planner</title>
+    <title>Creator Notepad</title>
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --blue: #007bff; --text: #e0e0e0; }
+        :root { --bg: #121212; --card: #1e1e1e; --blue: #007bff; --grey: #444; --text: #e0e0e0; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 40px; }
-        .container { background: var(--card); padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        h2 { color: var(--blue); margin-top: 0; }
-        input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #333; color: white; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: var(--blue); color: white; border: none; border-radius: 6px; margin-top: 10px; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #0056b3; }
-        ul { list-style: none; padding: 0; margin-top: 20px; }
-        li { background: #2a2a2a; padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .del { color: #ff4d4d; cursor: pointer; font-weight: bold; }
+        .container { background: var(--card); padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        h2 { color: var(--blue); }
+        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #333; color: white; border-radius: 6px; box-sizing: border-box; }
+        .task-card { background: #252525; padding: 15px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--blue); display: flex; align-items: center; justify-content: space-between; }
+        .controls { display: flex; gap: 5px; cursor: pointer; user-select: none; }
+        .status { font-size: 1.2em; filter: grayscale(1); opacity: 0.6; }
+        .status.active { filter: grayscale(0); opacity: 1; }
+        .del { color: #555; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Video Ideas</h2>
-    <input type="text" id="taskInput" placeholder="Enter video title (e.g. Greenville Police Chase)...">
-    <button onclick="addTask()">Add to List</button>
-    <ul id="taskList"></ul>
+    <h2>Video Notepad</h2>
+    <input type="text" id="taskInput" placeholder="New Video Idea..." onkeypress="if(event.key==='Enter') addTask()">
+    <div id="taskList"></div>
 </div>
 
 <script>
-    let tasks = JSON.parse(localStorage.getItem('myVideos')) || [];
-    function render() {
-        const list = document.getElementById('taskList');
-        list.innerHTML = tasks.map((t, i) => `<li>${t} <span class="del" onclick="del(${i})">✕</span></li>`).join('');
-    }
+    let tasks = JSON.parse(localStorage.getItem('creatorTasks')) || [];
+    function save() { localStorage.setItem('creatorTasks', JSON.stringify(tasks)); render(); }
+    
     function addTask() {
         const input = document.getElementById('taskInput');
-        if(input.value) { tasks.push(input.value); localStorage.setItem('myVideos', JSON.stringify(tasks)); input.value = ''; render(); }
+        if(input.value) { tasks.push({text: input.value, status: [false, false, false]}); input.value = ''; save(); }
     }
-    function del(i) { tasks.splice(i, 1); localStorage.setItem('myVideos', JSON.stringify(tasks)); render(); }
+
+    function toggle(tIndex, sIndex) {
+        tasks[tIndex].status[sIndex] = !tasks[tIndex].status[sIndex];
+        save();
+    }
+
+    function render() {
+        document.getElementById('taskList').innerHTML = tasks.map((t, i) => `
+            <div class="task-card">
+                <span>${t.text}</span>
+                <div class="controls">
+                    <span class="status ${t.status[0] ? 'active' : ''}" onclick="toggle(${i},0)">✅</span>
+                    <span class="status ${t.status[1] ? 'active' : ''}" onclick="toggle(${i},1)">✅</span>
+                    <span class="status ${t.status[2] ? 'active' : ''}" onclick="toggle(${i},2)">❌</span>
+                    <span class="del" onclick="tasks.splice(${i},1); save()">✕</span>
+                </div>
+            </div>
+        `).join('');
+    }
     render();
 </script>
 </body>
