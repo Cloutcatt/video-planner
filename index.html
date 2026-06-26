@@ -2,21 +2,24 @@
 <html>
 <head>
     <style>
-        body { background: #121212; color: #e0e0e0; font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; }
-        .container { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { color: #007bff; margin-top: 0; text-align: center; }
-        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; }
-        .task { background: #252525; padding: 15px; margin-top: 10px; border-radius: 8px; border-left: 4px solid #007bff; display: flex; justify-content: space-between; align-items: center; }
-        .controls { display: flex; gap: 8px; }
-        .btn-status { cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #333; color: #888; border: none; }
-        .btn-status.active { background: #007bff; color: white; }
+        body { background: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; padding-top: 50px; }
+        .container { background: #1e1e1e; padding: 30px; border-radius: 16px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        h2 { color: #fff; margin-bottom: 20px; font-weight: 600; }
+        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; margin-bottom: 20px; font-size: 16px; }
+        .item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #333; }
+        .checkbox { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .checkbox.checked { background: #007bff; border-color: #007bff; }
+        .checkbox.checked::after { content: '✓'; color: white; font-size: 14px; }
+        .text { flex-grow: 1; font-size: 16px; }
+        .delete { color: #555; cursor: pointer; font-size: 18px; }
+        .delete:hover { color: #ff4d4d; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Video Planner by Lolcat</h2>
-    <input type="text" id="taskInput" placeholder="Enter video idea..." onkeypress="if(event.key==='Enter') addTask()">
+    <h2>Video Planner</h2>
+    <input type="text" id="taskInput" placeholder="Add a new video idea..." onkeypress="if(event.key==='Enter') addTask()">
     <div id="taskList"></div>
 </div>
 
@@ -26,15 +29,21 @@
     function addTask() {
         let input = document.getElementById('taskInput');
         if(input.value.trim() !== "") {
-            tasks.push({text: input.value, status: [false, false, false]});
+            tasks.push({text: input.value, done: false});
             localStorage.setItem('myVideos', JSON.stringify(tasks));
             input.value = '';
             render();
         }
     }
 
-    function toggle(tIdx, sIdx) {
-        tasks[tIdx].status[sIdx] = !tasks[tIdx].status[sIdx];
+    function toggle(i) {
+        tasks[i].done = !tasks[i].done;
+        localStorage.setItem('myVideos', JSON.stringify(tasks));
+        render();
+    }
+
+    function del(i) {
+        tasks.splice(i, 1);
         localStorage.setItem('myVideos', JSON.stringify(tasks));
         render();
     }
@@ -42,13 +51,10 @@
     function render() {
         let list = document.getElementById('taskList');
         list.innerHTML = tasks.map((t, i) => `
-            <div class="task">
-                <span>${t.text}</span>
-                <div class="controls">
-                    <button class="btn-status ${t.status[0] ? 'active' : ''}" onclick="toggle(${i},0)">Recorded</button>
-                    <button class="btn-status ${t.status[1] ? 'active' : ''}" onclick="toggle(${i},1)">Edited</button>
-                    <button class="btn-status ${t.status[2] ? 'active' : ''}" onclick="toggle(${i},2)">Thumbnail</button>
-                </div>
+            <div class="item">
+                <div class="checkbox ${t.done ? 'checked' : ''}" onclick="toggle(${i})"></div>
+                <span class="text" style="${t.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${t.text}</span>
+                <span class="delete" onclick="del(${i})">×</span>
             </div>
         `).join('');
     }
