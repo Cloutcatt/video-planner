@@ -2,42 +2,38 @@
 <html>
 <head>
     <style>
-        body { background: #121212; color: #fff; font-family: sans-serif; display: flex; justify-content: center; padding: 50px; }
-        .container { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 400px; }
-        input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 20px; }
-        .task-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; }
-        .check { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; }
-        .check.done { background: #007bff; border-color: #007bff; }
-        /* Modal */
-        #modal { display: none; position: fixed; top: 100px; background: #252525; padding: 20px; border-radius: 10px; border: 1px solid #444; width: 350px; }
-        textarea { width: 100%; height: 100px; background: #121212; color: #fff; border: 1px solid #444; }
+        body { background: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; padding-top: 50px; }
+        .container { background: #1e1e1e; padding: 30px; border-radius: 16px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        h2 { color: #fff; margin-bottom: 20px; font-weight: 600; }
+        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; margin-bottom: 20px; font-size: 16px; }
+        .item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #333; }
+        .checkbox { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .checkbox.checked { background: #007bff; border-color: #007bff; }
+        .checkbox.checked::after { content: '✓'; color: white; font-size: 14px; }
+        .text { flex-grow: 1; font-size: 16px; }
+        .delete { color: #555; cursor: pointer; font-size: 18px; }
+        .delete:hover { color: #ff4d4d; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Video Planner</h2>
-    <input type="text" id="taskInput" placeholder="New idea..." onkeypress="if(event.key==='Enter') addTask()">
+    <input type="text" id="taskInput" placeholder="Add a new video idea..." onkeypress="if(event.key==='Enter') addTask()">
     <div id="taskList"></div>
-</div>
-
-<div id="modal">
-    <h3 id="mTitle">Notes</h3>
-    <textarea id="mArea" oninput="saveNote()"></textarea>
-    <button onclick="document.getElementById('modal').style.display='none'">Close</button>
 </div>
 
 <script>
     let tasks = JSON.parse(localStorage.getItem('myVideos')) || [];
-    let curIdx = 0;
 
     function addTask() {
-        let val = document.getElementById('taskInput').value;
-        if(!val) return;
-        tasks.push({text: val, done: false, note: ""});
-        localStorage.setItem('myVideos', JSON.stringify(tasks));
-        document.getElementById('taskInput').value = '';
-        render();
+        let input = document.getElementById('taskInput');
+        if(input.value.trim() !== "") {
+            tasks.push({text: input.value, done: false});
+            localStorage.setItem('myVideos', JSON.stringify(tasks));
+            input.value = '';
+            render();
+        }
     }
 
     function toggle(i) {
@@ -46,23 +42,19 @@
         render();
     }
 
-    function openNote(i) {
-        curIdx = i;
-        document.getElementById('mTitle').innerText = tasks[i].text;
-        document.getElementById('mArea').value = tasks[i].note;
-        document.getElementById('modal').style.display = 'block';
-    }
-
-    function saveNote() {
-        tasks[curIdx].note = document.getElementById('mArea').value;
+    function del(i) {
+        tasks.splice(i, 1);
         localStorage.setItem('myVideos', JSON.stringify(tasks));
+        render();
     }
 
     function render() {
-        document.getElementById('taskList').innerHTML = tasks.map((t, i) => `
-            <div class="task-row">
-                <div class="check ${t.done ? 'done' : ''}" onclick="toggle(${i})"></div>
-                <span onclick="openNote(${i})">${t.text}</span>
+        let list = document.getElementById('taskList');
+        list.innerHTML = tasks.map((t, i) => `
+            <div class="item">
+                <div class="checkbox ${t.done ? 'checked' : ''}" onclick="toggle(${i})"></div>
+                <span class="text" style="${t.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${t.text}</span>
+                <span class="delete" onclick="del(${i})">×</span>
             </div>
         `).join('');
     }
