@@ -2,63 +2,67 @@
 <html>
 <head>
     <style>
-        body { background: #121212; color: #e0e0e0; font-family: -apple-system, sans-serif; display: flex; justify-content: center; padding: 40px; }
-        .container { background: #1e1e1e; padding: 30px; border-radius: 16px; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; margin-bottom: 20px; }
-        .item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #333; cursor: pointer; }
-        .checkbox { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; }
-        .checked { background: #007bff; border-color: #007bff; }
-        .tag { color: #007bff; font-weight: bold; font-size: 12px; }
-        
-        /* Modal Styles */
-        #modal { display: none; position: fixed; top: 20%; left: 35%; width: 30%; background: #252525; padding: 20px; border-radius: 12px; border: 1px solid #444; }
-        textarea { width: 100%; height: 100px; background: #121212; color: white; border: 1px solid #444; padding: 10px; }
+        body { background: #121212; color: #fff; font-family: sans-serif; display: flex; justify-content: center; padding: 50px; }
+        .container { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 400px; }
+        input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 20px; }
+        .task-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; }
+        .check { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; }
+        .check.done { background: #007bff; border-color: #007bff; }
+        /* Modal */
+        #modal { display: none; position: fixed; top: 100px; background: #252525; padding: 20px; border-radius: 10px; border: 1px solid #444; width: 350px; }
+        textarea { width: 100%; height: 100px; background: #121212; color: #fff; border: 1px solid #444; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Video Planner by Lolcat</h2>
-    <input type="text" id="taskInput" placeholder="Add idea (e.g. #ERLC Police Chase)..." onkeypress="if(event.key==='Enter') addTask()">
+    <h2>Video Planner</h2>
+    <input type="text" id="taskInput" placeholder="New idea..." onkeypress="if(event.key==='Enter') addTask()">
     <div id="taskList"></div>
 </div>
 
 <div id="modal">
-    <h3 id="modalTitle">Notes</h3>
-    <textarea id="noteText" oninput="saveNote()"></textarea>
-    <button onclick="closeModal()">Close</button>
+    <h3 id="mTitle">Notes</h3>
+    <textarea id="mArea" oninput="saveNote()"></textarea>
+    <button onclick="document.getElementById('modal').style.display='none'">Close</button>
 </div>
 
 <script>
     let tasks = JSON.parse(localStorage.getItem('myVideos')) || [];
-    let activeIdx = null;
+    let curIdx = 0;
 
     function addTask() {
-        let input = document.getElementById('taskInput');
-        if(input.value.trim() !== "") {
-            tasks.push({text: input.value, done: false, note: ""});
-            localStorage.setItem('myVideos', JSON.stringify(tasks));
-            input.value = '';
-            render();
-        }
+        let val = document.getElementById('taskInput').value;
+        if(!val) return;
+        tasks.push({text: val, done: false, note: ""});
+        localStorage.setItem('myVideos', JSON.stringify(tasks));
+        document.getElementById('taskInput').value = '';
+        render();
     }
 
-    function openModal(i) {
-        activeIdx = i;
-        document.getElementById('modalTitle').innerText = tasks[i].text;
-        document.getElementById('noteText').value = tasks[i].note;
+    function toggle(i) {
+        tasks[i].done = !tasks[i].done;
+        localStorage.setItem('myVideos', JSON.stringify(tasks));
+        render();
+    }
+
+    function openNote(i) {
+        curIdx = i;
+        document.getElementById('mTitle').innerText = tasks[i].text;
+        document.getElementById('mArea').value = tasks[i].note;
         document.getElementById('modal').style.display = 'block';
     }
 
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    function saveNote() { tasks[activeIdx].note = document.getElementById('noteText').value; localStorage.setItem('myVideos', JSON.stringify(tasks)); }
+    function saveNote() {
+        tasks[curIdx].note = document.getElementById('mArea').value;
+        localStorage.setItem('myVideos', JSON.stringify(tasks));
+    }
 
     function render() {
-        let list = document.getElementById('taskList');
-        list.innerHTML = tasks.map((t, i) => `
-            <div class="item">
-                <div class="checkbox ${t.done ? 'checked' : ''}" onclick="tasks[${i}].done = !tasks[${i}].done; localStorage.setItem('myVideos', JSON.stringify(tasks)); render()"></div>
-                <span onclick="openModal(${i})">${t.text}</span>
+        document.getElementById('taskList').innerHTML = tasks.map((t, i) => `
+            <div class="task-row">
+                <div class="check ${t.done ? 'done' : ''}" onclick="toggle(${i})"></div>
+                <span onclick="openNote(${i})">${t.text}</span>
             </div>
         `).join('');
     }
